@@ -15,8 +15,11 @@ Account::Account()
 	// login an account
 	while (1)
 	{
-		std::cout << "==============================" << std::endl;
-		std::cout << "Please choose a way to continue:\nl:login\nr:register\nq:quit\n" << std::endl;
+		std::cout << "==============================\n"
+			<< "Please choose a way to continue:\n"
+			<< "l: login\n"
+			<< "r: register\n"
+			<< "q: quit\n" << std::endl;
 		std::cin >> op;
 		if (op[0] == 'l')
 		{
@@ -40,13 +43,18 @@ Account::Account()
 	}
 
 	// listen
-	p->listen();
+	p->listen(numberUser,numberPackage);
 }
 
 Account::~Account()
 {
 	delete p;
 	p = nullptr;
+
+	std::ofstream fout("info.txt");
+	fout << numberUser << std::endl << numberPackage << std::endl;
+	fout.close();
+
 }
 
 int Account::login(std::string userName)

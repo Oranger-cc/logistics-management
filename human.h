@@ -2,6 +2,7 @@
 #define HUMAN_H
 
 #include <string>
+#include "Filter.h"
 
 #define VALID_NEW_PASSWD 0
 #define EMPTY_PASSWD 1
@@ -14,6 +15,7 @@ class Human {
 protected:
     int id, bla;
     std::string name, tel, passwd, fileName; //fileName is as "data/User1.txt"
+    Filter ft;
 
 public:
     Human() {}
@@ -24,7 +26,7 @@ public:
     std::string getTel();
     std::string getName();
     virtual int init(std::string file) = 0;
-    virtual int listen()=0;
+    virtual int listen(const int numberUser,int& numberPackage)=0;
     int checkPasswd(const std::string newPasswd);
     int modifyPasswd(const std::string newPasswd);
     int modifyFileName(const std::string file);

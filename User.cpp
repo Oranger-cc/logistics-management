@@ -51,6 +51,11 @@ int User::init()
 int User::save()
 {
     static char buf[30] = { 0 };
+    if (fileName.empty())
+    {
+        std::cout << "Empty filename. Failed.\n" << std::endl;
+        return 1;
+    }
     std::ofstream fout(fileName);
     fout << (*this);
     fout.clear();
@@ -63,10 +68,81 @@ int User::save()
     return 0;
 }
 
-int User::listen()
+int User::listen(const int numberUser, int& numberPackage)
 {
-    //
-    return 0;
+    int num,inCome=0;
+    std::string op,str;
+    char buf[30];
+    while (1)
+    {
+        std::cout << "==============================\n"
+            << "Please choose a way to continue:\n"
+            << "mp [string]: change your password to [string]\n"
+            << "b: query your account balance\n"
+            << "c [number]: top up your account with [number] yuan\n"
+            << "f : search specified packages with parameters\n"
+            << "s [number]: send a package to user with ID [number]\n"
+            << "r [number]: confirm receipt of your package of ID [number]\n"
+            << "q: quit\n" << std::endl;
+        
+        std::cin >> op;
+        if (op[0] == 'm'&&op.length() >= 2 && op[1] == 'p')
+        {
+            std::cin >> str;
+            modifyPasswd(str);
+        }
+        else if (op[0] == 'b')
+        {
+            std::cout << bla << std::endl;
+        }
+        else if (op[0] == 'c')
+        {
+            std::cin >> num;
+            bla += num;
+        }
+        else if (op[0] == 'f')
+        {
+            
+        }
+        else if (op[0] == 's')
+        {
+            std::cout << "Please input the ID of the receiver:" << std::endl;
+            std::cin >> num;
+            if (num > numberUser)
+            {
+                std::cout << "The user does not exist.\n" << std::endl;
+                continue;
+            }
+            Package new_package(++numberPackage,PACKAGE_READY,id,num);
+            
+            bla-=15;
+            inCome += 15;
+        }
+        else if (op[0] == 'r')
+        {
+            std::cin >> num;
+            if (num > numberPackage)
+            {
+                std::cout << "The package does not exist." << std::endl;
+                continue;
+            }
+            sprintf_s(buf, "data/Package%d.txt", num);
+            Package t(buf);
+            if (t.recv(id) == 0)
+            {
+                std::cout << "The package has been confirmed to received.\n" << std::endl;
+            }
+            else
+            {
+                std::cout << "Failed to receive.\n" << std::endl;
+            }
+        }
+        else
+        {
+            std::cout << "Invalid input, try again." << std::endl;
+        }
+    }
+    return inCome;
 }
 
 std::istream& operator>>(std::istream& in, User& A)
