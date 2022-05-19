@@ -15,18 +15,23 @@ class Package {
 
 private:
 	int id,status,fromId,toId;
-	Timestamp tm;
+	Timestamp st,rt;
 	std::string fileName;
 
 public:
+	Package() {}
 	Package(int _id, int _status, int _fromId, int _toId);
 	Package(std::string _fileName);
-	int init(const std::string fileName);
+	int getFrom();
+	int getTo();
+	Timestamp getSendTime();
+	Timestamp getRecvTime();
+	int init(const std::string _fileName);
 	int init();
 	int save();
-	int eralier_than(Timestamp t);
-	int later_than(Timestamp t);
+	int send(int send_id);
 	int recv(int recv_id);
+	int permit(int user_id);
 	friend std::istream& operator >> (std::istream& in, Package& A);
 	friend std::ostream& operator << (std::ostream& out, Package& A);
 };

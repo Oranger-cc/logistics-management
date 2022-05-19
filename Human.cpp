@@ -18,6 +18,11 @@ int Human::getBla()
     return bla;
 }
 
+void Human::recharge(int ch)
+{
+    bla += ch;
+}
+
 std::string Human::getTel()
 {
     return tel;
@@ -60,13 +65,13 @@ int Human::modifyPasswd(const std::string newPasswd)
     {
     case VALID_NEW_PASSWD:
         passwd = newPasswd;
-        std::cerr << "Your password has been sucessfully updated!\n";
+        std::cout << "Your password has been sucessfully updated!\n";
         break;
     case EMPTY_PASSWD:
-        std::cerr << "Password can not be empty! Failed.\n";
+        std::cout << "Password can not be empty! Failed.\n";
         break;
     case EQUAL_TO_OLD_PASSWD:
-        std::cerr << "Password are equal to the old one! Failed.\n";
+        std::cout << "Password are equal to the old one! Failed.\n";
         break;
     }
     return response;

@@ -7,10 +7,17 @@
 class Filter
 {
 private:
-	std::vector<Package> ele;
+	//std::vector<Package> ele;
 public:
-	void init(const std::vector<int>&);
-	void filter(Timestamp time_low,Timestamp time_up,int id);
+	Filter() {}
+	//void config(const std::vector<int>&);
+	//void config(const int n);
+	void uFilter();
+	void pFilterById(int userId, int id);
+	void pFilterBySendTime(int userId, Timestamp low, Timestamp up);
+	void pFilterByRecvTime(int userId, Timestamp low, Timestamp up);
+	void pFilterByUser(int userId, int id);
+	//void pfilter(Timestamp low, Timestamp up, int id);
 };
 
 #endif

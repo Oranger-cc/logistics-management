@@ -13,12 +13,15 @@ private:
     std::vector<int> send, recv;
 
 public:
+    User() {}
     User(std::string _fileName) :Human(_fileName) { init(); }
-    User(int _id,std::string _name, std::string _fileName);
-    int init(std::string file);
+    User(int _id, std::string _name, std::string _fileName, std::string _passwd, std::string _tel, std::string _addr);
+    int init(std::string _fileName);
     int init();
     int save();
-    int listen(const int numberUser, int& numberPackage); // return income of Admin
+    int listen(); 
+    void appendSend(const int& packId);
+    void appendRecv(const int& packId);
     friend std::istream& operator >> (std::istream& in, User& A);
     friend std::ostream& operator << (std::ostream& out, User& A);
 };
