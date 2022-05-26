@@ -18,7 +18,7 @@ int Human::getBla()
     return bla;
 }
 
-void Human::recharge(int ch)
+void Human::recharge(double ch)
 {
     bla += ch;
 }

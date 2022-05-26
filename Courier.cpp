@@ -1,25 +1,25 @@
-#include "User.h"
-#include <iostream>
-#include <fstream>
+#include "Courier.h"
 #include "Controller.h"
+#include <fstream>
 
 extern Controller* now;
 
-User::User(int _id, std::string _name, std::string _fileName, std::string _passwd, std::string _tel, std::string _addr)
+Courier::Courier()
+{
+
+}
+
+Courier::Courier(int _id, std::string _name, std::string _fileName, std::string _passwd, std::string _tel)
 {
     id = _id;
     name = _name;
     fileName = _fileName;
     passwd = _passwd;
     tel = _tel;
-    addr = _addr;
     bla = 0;
-    sendNum = recvNum = 0;
-    send.clear();
-    recv.clear();
 }
 
-int User::init(const std::string _fileName)
+int Courier::init(std::string _fileName)
 {
     std::ifstream fin(_fileName);
     if (!fin)
@@ -33,38 +33,32 @@ int User::init(const std::string _fileName)
     return OPEN_FILE_SUCCESS;
 }
 
-int User::init()
-{
-    return init(fileName);
-}
-
-int User::save()
+void Courier::save()
 {
     static char buf[30] = { 0 };
     if (fileName.empty())
     {
-        std::cout << "Empty filename. Failed.\n" << std::endl;
-        return 1;
+        std::cout << "[Courier::save()]Error: Empty filename." << std::endl;
+        return;
     }
     std::ofstream fout(fileName);
     fout << (*this);
     fout.clear();
     fout.close();
-    
+
     sprintf_s(buf, "key/%s.txt", name.c_str());
     fout.open(buf);
     fout << passwd << std::endl;
-    fout << "User " << id << std::endl;
+    fout << "Courier " << id << std::endl;
     fout.close();
-    return 0;
 }
 
-int User::listen()
+int Courier::listen()
 {
     int num;
-    std::string op,str;
+    std::string op, str;
     Timestamp low, up;
-    char buf[30]={0};
+    char buf[30] = { 0 };
     while (1)
     {
         std::cout << "==============================\n"
@@ -72,14 +66,14 @@ int User::listen()
             << "mp [old password] [string]: change your password to [string]\n"
             << "b: query your account balance\n"
             << "c [number]: top up your account with [number] yuan\n"
-            << "f [r/s] [lower timestamp] [upper timestamp] [number]: search specified packages with parameters\n"
-            << "s [type:1/2/3] [number1] [number2]: send [type] package weighted [number1] to user with ID [number2]\n"
-            << "r [number]: confirm receipt of your package of ID [number]\n"
-            << "q: quit\n" 
+            << "f1 [r/s] [lower timestamp] [upper timestamp] [number]: search specified packages with parameters\n"
+            << "f2 [senderID] [receiverID] [packageID] [stauts:0/1/2/3]: search specified packages with parameters\n"
+            << "p [number]: pick a package with ID [number]\n"
+            << "q: quit\n"
             << "==============================\n" << std::endl;
-        
+
         std::cin >> op;
-        if (op[0] == 'm'&&op.length() >= 2 && op[1] == 'p')
+        if (op[0] == 'm' && op.length() >= 2 && op[1] == 'p')
         {
             std::cin >> str;
             if (checkPasswd(str) == EQUAL_TO_OLD_PASSWD)
@@ -110,7 +104,7 @@ int User::listen()
                 std::cout << "Input should be a positive integer. Failed.\n" << std::endl;
             }
         }
-        else if (op[0] == 'f')
+        else if (op[0] == 'f'&&op.length()>1&&op[1]=='1')
         {
             /*
             * The [number] field has the highest priority,
@@ -123,7 +117,7 @@ int User::listen()
             }
             else if (str[0] == 's')
             {
-                now->ft->pFilterBySendTime(id,low,up);
+                now->ft->pFilterBySendTime(id, low, up);
             }
             else if (str[0] == 'r')
             {
@@ -134,26 +128,23 @@ int User::listen()
                 std::cout << "Error: bad parameters. Failed.\n" << std::endl;
             }
         }
-        else if (op[0] == 's')
+        else if (op[0] == 'f' && op.length() > 1 && op[1] == '2')
         {
-            //std::cout << "Please input the ID of the receiver:" << std::endl;
-            int _type, _vol;
-            std::cin >> _type >> _vol >> num;
-            if (1 <= num && num <= (now->numberUser) && num != id)
+            int si, ri, pi;
+            std::cin >> si >> ri >> pi >> num;
+            if (~pi)
             {
-                now->sendNewPackage( _type, _vol, id, num);
-                std::cout << "Done.\n" << std::endl;
+                now->ft->pFilterByCourierId(id, pi);
             }
             else
             {
-                std::cout << "Invalid receiver ID. Failed.\n" << std::endl;
+                now->ft->pFilterCourier(id, si, ri, num);
             }
         }
-        else if (op[0] == 'r')
+        else if (op[0] == 'p')
         {
             std::cin >> num;
-            now->recvPackage(num, id);
-            std::cout << "Receive operation has done.\n" << std::endl;
+            now->pickPackage(num,id);
         }
         else if (op[0] == 'q')
         {
@@ -167,56 +158,18 @@ int User::listen()
     return 0;
 }
 
-void User::appendSend(const int& packId)
-{
-    sendNum++;
-    send.push_back(packId);
-}
-
-void User::appendRecv(const int& packId)
-{
-    recvNum++;
-    recv.push_back(packId);
-}
-
-std::istream& operator>>(std::istream& in, User& A)
+std::istream& operator>>(std::istream& in, Courier& A)
 {
     in >> A.id >> A.bla >> A.name >> A.tel >> A.passwd;
-    in >> A.addr;
-    
-    int t;
-    A.send.clear();
-    in >> A.sendNum;
-    for (int i = 1; i <= A.sendNum; i++)
-    {
-        in >> t;
-        A.send.push_back(t);
-    }
-    A.recv.clear();
-    in >> A.recvNum;
-    for (int i = 1; i <= A.recvNum; i++)
-    {
-        in >> t;
-        A.recv.push_back(t);
-    }
     return in;
 }
 
-std::ostream& operator << (std::ostream& out, User& A)
+std::ostream& operator<<(std::ostream& out, Courier& A)
 {
     out << A.id << std::endl;
     out << A.bla << std::endl;
     out << A.name << std::endl;
     out << A.tel << std::endl;
     out << A.passwd << std::endl;
-    out << A.addr << std::endl;
-    out << A.sendNum << std::endl;
-    for (auto x : A.send)
-        out << x <<' ';
-    out << std::endl;
-    out << A.recvNum << std::endl;
-    for (auto x : A.recv)
-        out << x << ' ';
-    out << std::endl;
     return out;
 }

@@ -39,6 +39,18 @@
     <ClCompile Include="Controller.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="Courier.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Fragile.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Book.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Normalpack.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Human.h">
@@ -60,6 +72,18 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="Controller.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Courier.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Fragile.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Book.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Normalpack.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

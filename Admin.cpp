@@ -56,8 +56,13 @@ int Admin::listen()
             << "Please choose a way to continue:\n"
             << "mp [string]: change your password to [string]\n"
             << "b: query your account balance\n"
-            << "f [user id] [r/s] [lower timestamp] [upper timestamp] [number]: search specified packages with parameters\n"
+            << "a: add a new courier\n"
+            << "d [courier_id]: delete the courier with [courier_id]\n"
+            << "f1 [user id] [r/s] [lower timestamp] [upper timestamp] [number]: search specified packages with parameters\n"
+            << "f2 [courier_id] [senderID] [receiverID] [packageID] [stauts:0/1/2/3]:\n"
+            << "    search specified packages with parameters, note [courier_id] cannot be empty\n"
             << "u: show all users' profile\n"
+            << "c: show all couriers' profile\n"
             << "q: quit\n"
             << "==============================\n" << std::endl;
 
@@ -71,7 +76,16 @@ int Admin::listen()
         {
             std::cout << "The balance in your account: " << bla << std::endl;
         }
-        else if (op[0] == 'f')
+        else if (op[0] == 'a')
+        {
+            now->registerCourier();
+        }
+        else if (op[0] == 'd')
+        {
+            std::cin >> num;
+            now->deleteCourier(num);
+        }
+        else if (op[0] == 'f' && op.length() > 1 && op[1] == '1')
         {
             /*
             * The [number] field has the highest priority,
@@ -92,12 +106,29 @@ int Admin::listen()
             }
             else
             {
-                std::cout << "Bad parameters. Failed.\n" << std::endl;
+                std::cout << "Bad parameters, failed.\n" << std::endl;
+            }
+        }
+        else if (op[0] == 'f' && op.length() > 1 && op[1] == '2')
+        {
+            int ci, si, ri, pi;
+            std::cin >> ci >> si >> ri >> pi >> num;
+            if (~pi)
+            {
+                now->ft->pFilterById(0, pi);
+            }
+            else
+            {
+                now->ft->pFilterCourier(ci, si, ri, num);
             }
         }
         else if (op[0] == 'u')
         {
             now->ft->uFilter();
+        }
+        else if (op[0] == 'c')
+        {
+            now->ft->cFilter();
         }
         else if (op[0] == 'q')
         {

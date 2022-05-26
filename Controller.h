@@ -1,22 +1,28 @@
 #pragma once
 
 #include <string>
-#include "Human.h"
-#include "Package.h"
 #include "User.h"
 #include "Admin.h"
+#include "Courier.h"
+#include "Human.h"
+#include "Fragile.h"
+#include "Book.h"
+#include "Normalpack.h"
+#include "Package.h"
 #include "Filter.h"
 
 #define MAX_USER 10000
+#define MAX_COURIER 10000
 #define MAX_PACKAGE 10000
 
 class Controller
 {
 public:
-	int numberUser, numberPackage;
+	int numberUser, numberPackage, numberCourier;
 	User* user;
 	Admin* admin; // only Admin's ID is 0
-	Package* package;
+	Courier* courier;
+	Package* package[MAX_PACKAGE];
 	Human* p; //current account
 	Filter* ft;
 
@@ -25,7 +31,10 @@ public:
 	int saveInfo();
 	int login(std::string userName);
 	int regist();
-	int sendNewPackage(int from, int to);
-	int recvPackage(int packageId, int to);
+	void registerCourier();
+	void deleteCourier(int courierId);
+	void sendNewPackage(int type, int volume, int from, int to);
+	void pickPackage(int packageId, int pass);
+	void recvPackage(int packageId, int to);
 };
 

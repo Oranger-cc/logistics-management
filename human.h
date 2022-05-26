@@ -13,7 +13,8 @@
 
 class Human {
 protected:
-    int id, bla;
+    int id;
+    double bla;
     std::string name, tel, passwd, fileName; //fileName is as "data/User1.txt"
 
 public:
@@ -22,7 +23,7 @@ public:
     virtual ~Human() {}
     int getId();
     int getBla();
-    void recharge(int ch);
+    void recharge(double ch);
     std::string getTel();
     std::string getName();
     virtual int init(std::string file) = 0;
@@ -35,10 +36,10 @@ public:
 };
 
 /*
-id bla
-name
-tel
-passwd
+* id bla
+* name
+* tel
+* passwd
 */
 
 #endif

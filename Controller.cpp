@@ -7,7 +7,7 @@ Controller::Controller()
 	char buf[30];
 
 	fin.open("data/info.txt");
-	fin >> numberUser >> numberPackage;
+	fin >> numberUser >> numberPackage >> numberCourier;
 	fin.clear();
 	fin.close();
 
@@ -18,14 +18,38 @@ Controller::Controller()
 		user[i].init(buf);
 	}
 
-	admin = new Admin("data/Admin1.txt");
+	courier = new Courier[MAX_COURIER];
+	for (int i = 1; i <= numberCourier; i++)
+	{
+		sprintf_s(buf, "data/Courier%d.txt", i);
+		courier[i].init(buf);
+	}
+
+	admin = new Admin("data/Admin0.txt");
 	admin->init();
 
-	package = new Package[MAX_PACKAGE];
 	for (int i = 1; i <= numberPackage; i++)
 	{
 		sprintf_s(buf, "data/Package%d.txt", i);
-		package[i].init(buf);
+		int _type;
+		std::ifstream fin(buf);
+		if (fin.is_open())
+		{
+			fin >> _type;
+			fin.close();
+			switch (_type)
+			{
+			case FRAGILE:
+				package[i] = new Fragile(buf);
+				break;
+			case BOOK:
+				package[i] = new Book(buf);
+				break;
+			case NORMALPACKAGE:
+				package[i] = new Normalpack(buf);
+				break;
+			}
+		}
 	}
 
 	p = nullptr;
@@ -42,13 +66,20 @@ Controller::~Controller()
 	delete[] user;
 	user = nullptr;
 	
+	for (int i = 1; i <= numberCourier; i++)
+		courier[i].save();
+	delete[] courier;
+	courier = nullptr;
+
 	admin->save();
 	delete admin;
 
 	for (int i = 1; i <= numberPackage; i++)
-		package[i].save();
-	delete[] package;
-	package = nullptr;
+	{
+		package[i]->save();
+		delete package[i];
+		package[i] = nullptr;
+	}
 
 	delete ft;
 }
@@ -56,7 +87,7 @@ Controller::~Controller()
 int Controller::saveInfo()
 {
 	std::ofstream fout("data/info.txt");
-	fout << numberUser << ' ' << numberPackage;
+	fout << numberUser << ' ' << numberPackage << ' ' << numberCourier;
 	fout.clear();
 	fout.close();
 	return 0;
@@ -98,6 +129,9 @@ int Controller::login(std::string userName)
 		case 'A':
 			p = admin;
 			break;
+		case 'C':
+			p = &courier[userId];
+			break;
 		default:
 			std::cout << "Invalid user type.\n" << std::endl;
 			break;
@@ -119,7 +153,7 @@ int Controller::regist()
 	std::cin >> userName;
 	if (userName.length() > 20)
 	{
-		std::cout << "The username is too long. Failed.\n" << std::endl;
+		std::cout << "The username is too long, failed.\n" << std::endl;
 		return 1;
 	}
 	sprintf_s(buf, "key/%s.txt", userName.c_str());
@@ -127,7 +161,7 @@ int Controller::regist()
 	if (fin.is_open())
 	{
 		fin.close();
-		std::cout << "The username has been registered. Failed.\n" << std::endl;
+		std::cout << "The username has been registered, failed.\n" << std::endl;
 		return 1;
 	}
 	fin.close();
@@ -142,7 +176,7 @@ int Controller::regist()
 		if (tmp1.compare(tmp2) == 0)
 			break;
 		else
-			std::cout << "The password do not match. Try again." << std::endl;
+			std::cout << "The password do not match, please try again." << std::endl;
 	}
 	tmpPasswd = tmp1;
 	std::cout << "Please input your telephone number:" << std::endl;
@@ -161,23 +195,130 @@ int Controller::regist()
 	return 0;
 }
 
-int Controller::sendNewPackage(int from, int to)
+void Controller::registerCourier()
 {
-	++numberPackage;
-	package[numberPackage] = Package(numberPackage, PACKAGE_READY, from, to);
-	package[numberPackage].send(from);
-	user[from].recharge(-15);
-	admin->recharge(15);
-	user[from].appendSend(numberPackage);
-	user[to].appendRecv(numberPackage);
-	return 0;
+	static char buf[30] = { 0 };
+	static std::string userName, tmp1, tmp2, tmpPasswd;
+	std::cout << "Please input new courier's username (no more than 20 chars):" << std::endl;
+	std::cin >> userName;
+	if (userName.length() > 20)
+	{
+		std::cout << "Error: The username is too long, failed.\n" << std::endl;
+		return;
+	}
+	sprintf_s(buf, "key/%s.txt", userName.c_str());
+	std::ifstream fin(buf);
+	if (fin.is_open())
+	{
+		fin.close();
+		std::cout << "Error: The username has been registered, failed.\n" << std::endl;
+		return;
+	}
+	fin.close();
+
+	// begin to create courier
+	while (1)
+	{
+		std::cout << "Please input new courier's password:" << std::endl;
+		std::cin >> tmp1;
+		std::cout << "Please input the password again to ensure:" << std::endl;
+		std::cin >> tmp2;
+		if (tmp1.compare(tmp2) == 0)
+			break;
+		else
+			std::cout << "The password do not match. Try again." << std::endl;
+	}
+	tmpPasswd = tmp1;
+	std::cout << "Please input your telephone number:" << std::endl;
+	std::cin >> tmp1;
+	
+	numberCourier++;
+	sprintf_s(buf, "data/Courier%d.txt", numberCourier);
+	courier[numberCourier] = Courier(numberCourier, userName, buf, tmpPasswd, tmp1);
+
+	saveInfo();
+	courier[numberCourier].save();
+	std::cout << "Register successfully!" << std::endl;
 }
 
-int Controller::recvPackage(int packageId, int to)
+void Controller::deleteCourier(int courierId)
+{
+	static char buf[30] = { 0 };
+	if (numberCourier <= 1)
+	{
+		std::cout << "[Controller::deleteCourier()]Error: number of couriers cannot be less than 1, failed.\n" << std::endl;
+		return;
+	}
+	if (courierId<1 || courierId>numberCourier)
+	{
+		std::cout << "[Controller::deleteCourier()]Error: given [courierId] is invalid, failed.\n" << std::endl;
+		return;
+	}
+
+	//delete relative files
+	sprintf_s(buf, "data/Courier%d.txt", numberCourier);
+	remove(buf);
+	
+	sprintf_s(buf, "key/%s.txt", courier[courierId].getName().c_str());
+	remove(buf);
+
+	//change relative packages information
+	for (int i = courierId; i < numberCourier; i++)
+		courier[i] = courier[i + 1];
+	for (int i = 1,j; i <= numberPackage; i++)
+	{
+		if ((j = package[i]->getPass()) > courierId)
+			package[i]->modifyPassId(j - 1);
+		else if ((package[i]->getPass()) == courierId)
+			package[i]->modifyPassId(1);
+	}
+	numberCourier--;
+	std::cout << "Delete courier operation done.\n" << std::endl;
+}
+
+void Controller::sendNewPackage(int type, int volume, int from, int to)
+{
+	if (numberPackage > MAX_PACKAGE)
+	{
+		std::cout << "[Controller::sendNewPackage()]Error: no space for new package, failed.\n" << std::endl;
+		return;
+	}
+	++numberPackage;
+	static int pass_id = rand() % numberCourier + 1;
+	switch (type)
+	{
+	case FRAGILE:
+		package[numberPackage] = new Fragile(type, volume, numberPackage, PACKAGE_READY, from, pass_id, to);
+		break;
+	case BOOK:
+		package[numberPackage] = new Book(type, volume, numberPackage, PACKAGE_READY, from, pass_id, to);
+		break;
+	case NORMALPACKAGE:
+		package[numberPackage] = new Normalpack(type, volume, numberPackage, PACKAGE_READY, from, pass_id, to);
+		break;
+	}
+	package[numberPackage]->send(from);
+	static int fee = package[numberPackage]->getPrice();
+	user[from].recharge(-fee);
+	admin->recharge(fee);
+	user[from].appendSend(numberPackage);
+	user[to].appendRecv(numberPackage);
+	std::cout << "[Controller::sendNewPackage()]package assigned to Courier " << pass_id << ".\n" << std::endl;
+}
+
+void Controller::pickPackage(int packageId, int pass)
 {
 	if (1 <= packageId && packageId <= numberPackage)
 	{
-		return package[packageId].recv(to);
+		package[packageId]->pick(pass);
+		static int fee = package[packageId]->getPrice();
+		admin->recharge(-0.5 * fee);
+		courier[pass].recharge(0.5 * fee);
 	}
-	return 1;
+}
+
+void Controller::recvPackage(int packageId, int to)
+{
+	if (1 <= packageId && packageId <= numberPackage)
+		package[packageId]->recv(to);
 }
