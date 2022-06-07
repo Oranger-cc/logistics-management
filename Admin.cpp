@@ -58,6 +58,7 @@ int Admin::listen()
             << "b: query your account balance\n"
             << "a: add a new courier\n"
             << "d [courier_id]: delete the courier with [courier_id]\n"
+            << "r [package_id] [courier_id]: re-assign [package_id] to [courier_id]\n"
             << "f1 [user id] [r/s] [lower timestamp] [upper timestamp] [number]: search specified packages with parameters\n"
             << "f2 [courier_id] [senderID] [receiverID] [packageID] [stauts:0/1/2/3]:\n"
             << "    search specified packages with parameters, note [courier_id] cannot be empty\n"
@@ -84,6 +85,12 @@ int Admin::listen()
         {
             std::cin >> num;
             now->deleteCourier(num);
+        }
+        else if (op[0] == 'r')
+        {
+            int pi, ci;
+            std::cin >> pi >> ci;
+            now->reAssignPackage(pi, ci);
         }
         else if (op[0] == 'f' && op.length() > 1 && op[1] == '1')
         {

@@ -34,6 +34,7 @@ public:
 	void registerCourier();
 	void deleteCourier(int courierId);
 	void sendNewPackage(int type, int volume, int from, int to);
+	void reAssignPackage(int packageId, int pass);
 	void pickPackage(int packageId, int pass);
 	void recvPackage(int packageId, int to);
 };

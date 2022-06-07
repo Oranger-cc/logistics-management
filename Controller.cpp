@@ -306,6 +306,19 @@ void Controller::sendNewPackage(int type, int volume, int from, int to)
 	std::cout << "[Controller::sendNewPackage()]package assigned to Courier " << pass_id << ".\n" << std::endl;
 }
 
+void Controller::reAssignPackage(int packageId, int pass)
+{
+	if (1 <= packageId && packageId <= numberPackage)
+	{
+		if(package[packageId]->getStatus()==PACKAGE_READY)
+			package[packageId]->modifyPassId(pass);
+		else
+		{
+			std::cout << "[Controller::reAssignPackage()]Error: the package has been picked, failed." << std::endl;
+		}
+	}
+}
+
 void Controller::pickPackage(int packageId, int pass)
 {
 	if (1 <= packageId && packageId <= numberPackage)
